@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bharosa Loan (Firebase)</title>
+<style>
+:root{--bg:#f4f7f6;--card:#fff;--text:#14211f;--mute:#5d6f6b;--pri:#0a7c6a;--on:#fff;--line:#d9e3e0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1c1c;--card:#2a2a2a;--text:#f2f2f2;--mute:#a3adab;--pri:#2fd0b5;--on:#04211c;--line:#3a3a3a}}
+:root[data-theme="dark"]{--bg:#1c1c1c;--card:#2a2a2a;--text:#f2f2f2;--mute:#a3adab;--pri:#2fd0b5;--on:#04211c;--line:#3a3a3a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:440px;min-height:100vh;display:flex;flex-direction:column}
+.scr{display:none;flex:1;padding:20px 18px 90px}
+.scr.on{display:block}
+h1{font-size:22px;margin:0 0 6px}h2{font-size:17px;margin:22px 0 10px}
+p{color:var(--mute);margin:0 0 14px;font-size:14px}
+.logo{font-weight:700;font-size:22px;color:var(--pri);margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.big{font-size:30px;font-weight:700}
+.btn{width:100%;padding:14px;border-radius:12px;border:0;background:var(--pri);color:var(--on);font-size:16px;font-weight:600;cursor:pointer}
+.btn.o{background:transparent;color:var(--pri);border:1.5px solid var(--pri)}
+.dots{display:flex;gap:14px;margin:26px 0}
+.dots i{width:54px;height:54px;border:1.5px solid var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:24px}
+.dots i.f{border-color:var(--pri)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.pad button{padding:16px;font-size:22px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+.row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row small{display:block;color:var(--mute);margin-top:2px}
+.row b{font-size:15px}
+input[type=range]{width:100%;accent-color:var(--pri)}
+.chips{display:flex;gap:8px;margin:10px 0 16px}
+.chip{flex:1;padding:10px;text-align:center;border-radius:10px;border:1.5px solid var(--line);cursor:pointer;font-size:14px}
+.chip.on{border-color:var(--pri);color:var(--pri);font-weight:600}
+nav{position:fixed;bottom:0;width:100%;max-width:440px;display:flex;background:var(--card);border-top:1px solid var(--line);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;background:none;border:0;color:var(--mute);font-size:12px;padding:6px;cursor:pointer}
+nav button.on{color:var(--pri);font-weight:700}
+nav span{display:block;font-size:20px}
+.ring{width:150px;height:150px;border-radius:50%;margin:10px auto;background:conic-gradient(var(--pri) 0 74%,var(--line) 74% 100%);display:flex;align-items:center;justify-content:center}
+.ring div{width:112px;height:112px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:30px;font-weight:700}
+.ring small{font-size:12px;color:var(--mute);font-weight:400}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--pri);color:var(--on);padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:.3s;pointer-events:none}
+#toast.s{opacity:1}
+.note{font-size:11px;color:var(--mute);text-align:center;margin-top:18px}
+.phone{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;margin:20px 0 16px;background:var(--card)}
+.phone span{color:var(--mute);font-size:16px}
+.phone input,.otp{flex:1;width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:18px;padding:15px 0}
+.otp{border:1.5px solid var(--line);border-radius:12px;background:var(--card);text-align:center;letter-spacing:12px;font-size:24px;margin:20px 0 16px;padding:15px}
+.btn:disabled{opacity:.5;cursor:default}
+</style>
+</head>
+<body>
+<div id="app">
+
+<section class="scr on" id="login">
+  <div class="logo">Bharosa Loan</div>
+  <h1 id="lt">Aapka swagat hai</h1>
+  <p id="lp">Shuru karne ke liye apna mobile number daalein</p>
+  <div id="st1">
+    <div class="phone"><span>+91</span><input id="mob" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit mobile number"></div>
+    <button class="btn" onclick="sendOtp()">OTP bhejein</button>
+  </div>
+  <div id="st2" style="display:none">
+    <input id="otp" class="otp" type="tel" inputmode="numeric" maxlength="6" placeholder="······">
+    <button class="btn" onclick="verifyOtp()">Verify karein</button>
+    <button class="btn o" id="rs" style="margin-top:10px" onclick="sendOtp()">OTP dobara bhejein</button>
+    <p class="note" id="cd"></p>
+    <p class="note" style="color:var(--pri);cursor:pointer" onclick="chgNum()">Number badlein</p>
+  </div>
+  <div id="recaptcha"></div>
+  <p class="note">Aage badhkar aap Terms aur Privacy Policy se sahmat hain.</p>
+</section>
+
+<section class="scr" id="pin">
+  <div class="logo">Bharosa Loan</div>
+  <h1>Naya PIN banayein</h1>
+  <p>Account kholne ke liye 4-digit PIN chunein (demo: koi bhi PIN chalega)</p>
+  <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+  <div class="pad" id="pad"></div>
+</section>
+
+<section class="scr" id="home">
+  <div class="logo">Bharosa Loan</div>
+  <div class="card">
+    <p style="margin:0">Baaki loan</p>
+    <div class="big" id="bal">₹12,000</div>
+    <p style="margin:6px 0 14px">Agli EMI ₹2,150 · 05 Dec 2026</p>
+    <button class="btn" onclick="repay()">Make a Repayment</button>
+  </div>
+  <div class="card" onclick="go('score')" style="cursor:pointer">
+    <b>Apna Credit Score free dekhein</b>
+    <p style="margin:6px 0 0;color:var(--pri)">Check Now ›</p>
+  </div>
+  <h2>Recent Transactions</h2>
+  <div class="card" id="tx" style="padding:4px 16px"></div>
+</section>
+
+<section class="scr" id="loans">
+  <h1>Loan lein</h1>
+  <p>Amount aur time chunein</p>
+  <div class="card">
+    <p style="margin:0">Loan amount</p>
+    <div class="big" id="amt">₹20,000</div>
+    <input type="range" id="rng" min="5000" max="50000" step="1000" value="20000">
+    <p style="margin:14px 0 0">Kitne mahine</p>
+    <div class="chips" id="chips"></div>
+    <div class="row"><span>Monthly EMI (andaza)</span><b id="emi"></b></div>
+    <div class="row" style="border:0"><span>Kul wapsi</span><b id="tot"></b></div>
+  </div>
+  <button class="btn" onclick="toast('Application bheji gayi (demo)')">Apply Now</button>
+  <p class="note">Demo ke liye 2% mahina flat byaaj maana gaya hai. Asli rate lender tay karega.</p>
+</section>
+
+<section class="scr" id="score">
+  <h1>Credit Score</h1>
+  <p>Aapka score achha hai. Samay par EMI dene se aur badhega.</p>
+  <div class="card"><div class="ring"><div>742<small>Achha</small></div></div></div>
+  <div class="card">
+    <div class="row"><span>Samay par bhugtan</span><b>100%</b></div>
+    <div class="row"><span>Credit use</span><b>32%</b></div>
+    <div class="row" style="border:0"><span>Account ki umar</span><b>1 saal</b></div>
+  </div>
+</section>
+
+<section class="scr" id="rewards">
+  <h1>Rewards</h1>
+  <p>Samay par repayment karein, inaam paayein</p>
+  <div class="card"><b>Cashback ₹50</b><p style="margin:6px 0 0">Agli EMI 3 din pehle dene par</p></div>
+  <div class="card"><b>Kam byaaj</b><p style="margin:6px 0 0">3 EMI samay par dene par agle loan par chhoot</p></div>
+  <div class="card"><b>Dost ko bulayein</b><p style="margin:6px 0 0">Har safal referral par ₹100</p></div>
+</section>
+
+<nav id="nav" style="display:none">
+  <button data-g="home" class="on"><span>⌂</span>Home</button>
+  <button data-g="loans"><span>₹</span>Loans</button>
+  <button data-g="score"><span>◔</span>Cr. Score</button>
+  <button data-g="rewards"><span>★</span>Rewards</button>
+</nav>
+<div id="toast"></div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+/* Firebase Console > Project settings > Your apps > Web app se ye values copy karein */
+var FIREBASE_CONFIG={
+  apiKey:"AIzaSyDG1QH6e38xA2tY7baIRixsxAS-6JutJ4g",
+  authDomain:"bharosa-loan.firebaseapp.com",
+  projectId:"bharosa-loan",
+  appId:"1:137716627678:web:561ca86798bb23b5226a4f"
+};
+</script>
+<script>
+var pin="",bal=12000,tenure=6;
+var txs=[["Loan Repayment","05 Nov 2026 · 10:23 AM",8526],["Loan Repayment","21 Oct 2026 · 12:22 PM",4272],["Loan Repayment","10 Oct 2026 · 10:03 AM",1624]];
+function $(i){return document.getElementById(i)}
+function fmt(n){return "₹"+Math.round(n).toLocaleString("en-IN")}
+function toast(t){var e=$("toast");e.textContent=t;e.className="s";setTimeout(function(){e.className=""},2200)}
+function go(g){
+  document.querySelectorAll(".scr").forEach(function(s){s.className="scr"});
+  $(g).className="scr on";
+  document.querySelectorAll("nav button").forEach(function(b){b.className=b.dataset.g===g?"on":""});
+  window.scrollTo(0,0);
+}
+var pad=$("pad");
+["1","2","3","4","5","6","7","8","9","","0","⌫"].forEach(function(k){
+  var b=document.createElement("button");b.textContent=k;
+  if(!k)b.style.visibility="hidden";
+  b.onclick=function(){
+    if(k==="⌫")pin=pin.slice(0,-1);else if(pin.length<4)pin+=k;
+    var d=$("dots").children;
+    for(var i=0;i<4;i++){d[i].textContent=i<pin.length?"•":"";d[i].className=i<pin.length?"f":""}
+    if(pin.length===4){setTimeout(function(){pin="";for(var i=0;i<4;i++){d[i].textContent="";d[i].className=""}$("nav").style.display="flex";go("home")},250)}
+  };
+  pad.appendChild(b);
+});
+function renderTx(){
+  $("tx").innerHTML=txs.map(function(t){return '<div class="row"><span>'+t[0]+'<small>'+t[1]+'</small></span><b>'+fmt(t[2])+'</b></div>'}).join("");
+  $("bal").textContent=fmt(bal);
+}
+function repay(){
+  if(bal<=0){toast("Koi loan baaki nahi");return}
+  var p=Math.min(2150,bal);bal-=p;
+  txs.unshift(["Loan Repayment","Abhi · "+new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}),p]);
+  renderTx();toast("Repayment safal: "+fmt(p));
+}
+function calc(){
+  var a=+$("rng").value,r=0.02,tot=a*(1+r*tenure);
+  $("amt").textContent=fmt(a);$("emi").textContent=fmt(tot/tenure);$("tot").textContent=fmt(tot);
+}
+$("rng").oninput=calc;
+$("chips").innerHTML=[3,6,9,12].map(function(m){return '<div class="chip'+(m===6?' on':'')+'" data-m="'+m+'">'+m+' mahine</div>'}).join("");
+$("chips").onclick=function(e){
+  var m=e.target.dataset.m;if(!m)return;tenure=+m;
+  [].forEach.call($("chips").children,function(c){c.className="chip"+(c.dataset.m===m?" on":"")});calc();
+};
+document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){go(b.dataset.g)}});
+var tm,confirmation=null,verifier=null,sending=false;
+firebase.initializeApp(FIREBASE_CONFIG);
+var auth=firebase.auth();auth.languageCode="hi";
+function resetVerifier(){
+  if(verifier){try{verifier.clear()}catch(e){}verifier=null}
+  $("recaptcha").innerHTML="";
+}
+function errMsg(e){
+  var c=e&&e.code||"";
+  if(c==="auth/invalid-phone-number")return "Mobile number sahi nahi hai";
+  if(c==="auth/too-many-requests")return "Bahut zyada koshish. Thodi der baad try karein";
+  if(c==="auth/invalid-verification-code")return "Galat OTP. Dobara daalein";
+  if(c==="auth/code-expired")return "OTP expire ho gaya. Naya OTP mangwayein";
+  if(c==="auth/quota-exceeded")return "SMS limit poori ho gayi";
+  return "Kuch gadbad hui. Dobara koshish karein";
+}
+function startTimer(){
+  var s=30;$("rs").disabled=true;clearInterval(tm);
+  $("cd").textContent="Dobara bhejne ke liye "+s+" sec";
+  tm=setInterval(function(){s--;if(s<=0){clearInterval(tm);$("rs").disabled=false;$("cd").textContent=""}else{$("cd").textContent="Dobara bhejne ke liye "+s+" sec"}},1000);
+}
+function sendOtp(){
+  if(sending)return;
+  var m=$("mob").value.replace(/\D/g,"");
+  if(!/^[6-9]\d{9}$/.test(m)){toast("Sahi 10 digit mobile number daalein");return}
+  sending=true;toast("OTP bheja ja raha hai...");
+  resetVerifier();
+  verifier=new firebase.auth.RecaptchaVerifier("recaptcha",{size:"invisible"});
+  auth.signInWithPhoneNumber("+91"+m,verifier).then(function(r){
+    confirmation=r;sending=false;
+    $("st1").style.display="none";$("st2").style.display="block";
+    $("lt").textContent="OTP verify karein";
+    $("lp").textContent="+91 "+m+" par 6 digit ka code bheja gaya";
+    toast("OTP bhej diya gaya");startTimer();
+  }).catch(function(e){sending=false;resetVerifier();toast(errMsg(e))});
+}
+function verifyOtp(){
+  var c=$("otp").value;
+  if(!/^\d{6}$/.test(c)){toast("6 digit ka OTP daalein");return}
+  if(!confirmation){toast("Pehle OTP mangwayein");return}
+  confirmation.confirm(c).then(function(){
+    clearInterval(tm);toast("Number verify ho gaya");go("pin");
+  }).catch(function(e){toast(errMsg(e))});
+}
+function chgNum(){
+  clearInterval(tm);$("otp").value="";$("st2").style.display="none";$("st1").style.display="block";
+  $("lt").textContent="Aapka swagat hai";$("lp").textContent="Shuru karne ke liye apna mobile number daalein";
+}
+renderTx();calc();
+</script>
+</body>
+</html>
